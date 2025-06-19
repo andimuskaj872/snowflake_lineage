@@ -1,15 +1,15 @@
-# Snowflake Query Tool
+# Snowflake Lineage Explorer
 
-A simple and intuitive Streamlit web application for connecting to Snowflake and executing SQL queries interactively.
+Interactive Streamlit application for exploring Snowflake data lineage relationships and column-level access history using the `GET_LINEAGE` function and `ACCESS_HISTORY` views.
 
 ## Features
 
-- 🔗 **Easy Snowflake Connection**: Connect using environment variables
-- 💻 **Interactive Query Execution**: Write and execute SQL queries in a user-friendly interface
-- 📊 **Results Display**: View query results in a clean, paginated table format
-- 📥 **CSV Export**: Download query results as CSV files
-- 🔄 **Session Management**: Persistent connection during your session
-- ⚡ **Real-time Feedback**: Loading indicators and error handling
+- 🔗 **Data Lineage Explorer**: Trace upstream/downstream dependencies using Snowflake's GET_LINEAGE function
+- 📊 **Column-Level Access History**: Analyze when and how columns were last accessed (last 7 days)
+- 🔄 **Cascading Dropdowns**: Smart database/schema/table/column selection with lazy loading
+- 📥 **Multiple Export Options**: Download results as CSV or save directly to Snowflake tables
+- 🏔️ **Optimized Queries**: Efficient ACCESS_HISTORY queries with proper clustering/pruning
+- 🌐 **Easy Authentication**: Support for both .env files and native Snowflake config files
 
 ## Prerequisites
 

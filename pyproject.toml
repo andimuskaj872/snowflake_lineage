@@ -1,14 +1,14 @@
 [project]
-name = "snowflake-query-tool"
+name = "snowflake-lineage-explorer"
 version = "1.0.0"
-description = "A simple and intuitive Streamlit web application for connecting to Snowflake and executing SQL queries interactively."
+description = "Interactive Streamlit app for exploring Snowflake data lineage and column-level access history using GET_LINEAGE and ACCESS_HISTORY."
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "Andi Muskaj", email = "andimuskaj872@gmail.com"}
 ]
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.9"
-keywords = ["snowflake", "sql", "streamlit", "data", "analytics"]
+keywords = ["snowflake", "lineage", "streamlit", "data", "analytics", "access-history", "data-governance"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -25,9 +25,10 @@ classifiers = [
 
 dependencies = [
     "streamlit>=1.31.0",
-    "snowflake-connector-python>=3.7.0",
+    "snowflake-connector-python[secure-local-storage]>=3.7.0",
     "pandas>=2.2.0",
     "python-dotenv>=1.0.0",
+    "pyarrow<19.0.0",
 ]
 
 [project.optional-dependencies]
@@ -38,12 +39,12 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/snowflake-query-tool"
-Repository = "https://github.com/yourusername/snowflake-query-tool"
-Issues = "https://github.com/yourusername/snowflake-query-tool/issues"
+Homepage = "https://github.com/andimuskaj872/snowflake_lineage"
+Repository = "https://github.com/andimuskaj872/snowflake_lineage"
+Issues = "https://github.com/andimuskaj872/snowflake_lineage/issues"
 
 [project.scripts]
-snowflake-query-tool = "app:main"
+snowflake-lineage-explorer = "app:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -51,7 +52,7 @@ build-backend = "hatchling.build"
 
 [tool.ruff]
 line-length = 88
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
@@ -59,4 +60,4 @@ ignore = ["E501"]
 
 [tool.black]
 line-length = 88
-target-version = ['py38']
+target-version = ['py39']

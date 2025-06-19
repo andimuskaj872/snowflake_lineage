@@ -105,9 +105,6 @@ def create_connection():
         # Remove any None or empty values
         connection_params = {k: v for k, v in connection_params.items() if v}
         
-        # Debug: Show what parameters we're using (hide sensitive info)
-        debug_params = {k: v if k != 'password' else '***' for k, v in connection_params.items()}
-        st.info(f"🔍 Debug - Connection parameters: {debug_params}")
         
         # Create connection
         conn = snowflake.connector.connect(**connection_params)
@@ -572,7 +569,7 @@ def main():
         
         # Additional analysis options
         st.markdown("**📊 Additional Analysis**")
-        include_usage_history = st.checkbox(
+        include_access_history = st.checkbox(
             "Include Access History (Last 7 Days)",
             help="Analyze access history to see when and how this object/column was last accessed (requires ACCOUNTADMIN role or access to ACCOUNT_USAGE)"
         )
@@ -613,10 +610,10 @@ def main():
                     )
                     
                     # Also get access history if requested
-                    usage_df, usage_query = None, None
-                    if include_usage_history and df is not None:
+                    access_df, access_query = None, None
+                    if include_access_history and df is not None:
                         with st.spinner("Analyzing access history for all lineage objects..."):
-                            usage_df, usage_query = execute_access_history_query(
+                            access_df, access_query = execute_access_history_query(
                                 st.session_state.connection,
                                 df
                             )
@@ -630,9 +627,9 @@ def main():
                             'object_type': object_type,
                             'direction': direction,
                             'depth_display': depth_display,
-                            'usage_df': usage_df,
-                            'usage_query': usage_query,
-                            'include_usage_history': include_usage_history
+                            'access_df': access_df,
+                            'access_query': access_query,
+                            'include_access_history': include_access_history
                         }
         
         # Display results (either from current query or from session state)
@@ -644,9 +641,9 @@ def main():
             object_type = results_data['object_type']
             direction = results_data['direction']
             depth_display = results_data['depth_display']
-            usage_df = results_data.get('usage_df')
-            usage_query = results_data.get('usage_query')
-            include_usage_history = results_data.get('include_usage_history', False)
+            access_df = results_data.get('access_df')
+            access_query = results_data.get('access_query')
+            include_access_history = results_data.get('include_access_history', False)
             
             
             st.header("📊 Analysis Results")
@@ -655,12 +652,12 @@ def main():
             with st.expander("🔍 View Generated Queries"):
                 st.markdown("**Lineage Query:**")
                 st.code(query, language="sql")
-                if usage_query:
+                if access_query:
                     st.markdown("**Access History Query:**")
-                    st.code(usage_query, language="sql")
+                    st.code(access_query, language="sql")
             
             # Create tabs for different result types
-            if include_usage_history and usage_df is not None:
+            if include_access_history and access_df is not None:
                 tab1, tab2 = st.tabs(["🔗 Lineage Results", "📈 Access History (Last 7 Days)"])
             else:
                 tab1 = st.container()
@@ -834,38 +831,38 @@ def main():
                 with tab2:
                     st.subheader("📈 Column Access History (Last 7 Days)")
                     
-                    if usage_df is not None and not usage_df.empty:
-                        st.write(f"**Objects/Columns with access data:** {len(usage_df)}")
+                    if access_df is not None and not access_df.empty:
+                        st.write(f"**Objects/Columns with access data:** {len(access_df)}")
                         
                         # Display access history summary
-                        st.dataframe(usage_df, use_container_width=True)
+                        st.dataframe(access_df, use_container_width=True)
                         
                         # Access insights
-                        if len(usage_df) > 0:
+                        if len(access_df) > 0:
                             st.subheader("📊 Access Summary")
                             
                             col1, col2, col3 = st.columns(3)
                             
                             with col1:
-                                unique_objects = usage_df['OBJECT_NAME'].nunique()
+                                unique_objects = access_df['OBJECT_NAME'].nunique()
                                 st.metric("Objects Accessed", unique_objects)
                             
                             with col2:
-                                column_access_count = len(usage_df[usage_df['COLUMN_NAME'] != 'TABLE_LEVEL'])
+                                column_access_count = len(access_df[access_df['COLUMN_NAME'] != 'TABLE_LEVEL'])
                                 st.metric("Columns Accessed", column_access_count)
                             
                             with col3:
-                                if 'LAST_ACCESSED' in usage_df.columns:
-                                    latest_access = usage_df['LAST_ACCESSED'].max()
+                                if 'LAST_ACCESSED' in access_df.columns:
+                                    latest_access = access_df['LAST_ACCESSED'].max()
                                     st.metric("Most Recent Access", latest_access.strftime('%Y-%m-%d %H:%M') if latest_access else 'N/A')
                             
                             # Show objects by access recency
                             st.subheader("Objects by Access Recency")
-                            object_latest = usage_df.groupby('OBJECT_NAME')['LAST_ACCESSED'].max().sort_values(ascending=False)
+                            object_latest = access_df.groupby('OBJECT_NAME')['LAST_ACCESSED'].max().sort_values(ascending=False)
                             st.bar_chart(object_latest.head(10))
                             
                             # Show column access summary
-                            column_data = usage_df[usage_df['COLUMN_NAME'] != 'TABLE_LEVEL']
+                            column_data = access_df[access_df['COLUMN_NAME'] != 'TABLE_LEVEL']
                             if not column_data.empty:
                                 st.subheader("Column Access Summary")
                                 
@@ -881,15 +878,15 @@ def main():
                         
                         # Export access history
                         st.subheader("📤 Export Access History")
-                        usage_csv = usage_df.to_csv(index=False)
+                        access_csv = access_df.to_csv(index=False)
                         st.download_button(
                             label="📥 Download Column Access History as CSV",
-                            data=usage_csv,
+                            data=access_csv,
                             file_name=f"column_access_history_{object_name.replace('.', '_')}_7days.csv",
                             mime="text/csv"
                         )
                     
-                    elif include_usage_history:
+                    elif include_access_history:
                         st.info("No access history found for objects in the lineage in the last 7 days.")
                         st.markdown("""
                         **Note:** Column access history analysis requires:
