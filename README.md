@@ -11,6 +11,8 @@ Interactive Streamlit application for exploring Snowflake data lineage relations
 - 🏔️ **Optimized Queries**: Efficient ACCESS_HISTORY queries with proper clustering/pruning
 - 🌐 **Easy Authentication**: Support for both .env files and native Snowflake config files
 
+> **Note**: The custom query history feature is still a work in progress and may be added in future releases.
+
 ## Prerequisites
 
 - Python 3.8+
