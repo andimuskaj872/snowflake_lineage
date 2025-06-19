@@ -1,0 +1,18 @@
+# Snowflake Configuration File Example
+# Copy this file to 'snowflake_config.toml' and replace with your actual credentials
+# Get these from: Profile Icon → Account → View Account Details → Download Config
+
+[connections.my_example_connection]
+account = "YOUR_ACCOUNT_ID"
+user = "YOUR_USERNAME"
+authenticator = "externalbrowser"
+role = "YOUR_ROLE"
+warehouse = "YOUR_WAREHOUSE"
+database = "YOUR_DATABASE"
+schema = "YOUR_SCHEMA"
+
+# Notes:
+# - You can literally copy-paste the config from Snowflake
+# - Set warehouse/database/schema to your preferences (or leave as "<none selected>")
+# - For password auth, add: password = "your_password_here"
+# - Browser auth (externalbrowser) is more secure and supports SSO/MFA
