@@ -207,6 +207,8 @@ Your account identifier can be found in several formats:
 5. **Copy the entire config section**
 
 **You'll get something like this:**
+
+**Option 1: SSO/Browser Auth (Recommended):**
 ```toml
 [connections.my_example_connection]
 account = "xy12345-ab67890"
@@ -218,18 +220,34 @@ database = "SALES_DB"
 schema = "PUBLIC"
 ```
 
+**Option 2: Password Auth (Traditional):**
+```toml
+[connections.my_example_connection]
+account = "xy12345-ab67890"
+user = "john.doe"
+password = "YourPassword123!"
+role = "ACCOUNTADMIN"
+warehouse = "COMPUTE_WH"
+database = "SALES_DB"
+schema = "PUBLIC"
+```
+
 6. **Save it to the config file:**
    ```bash
-   # Edit the existing config file and replace the sample with your config
+   # Copy the example and choose your authentication method
+   cp snowflake_config.toml.example snowflake_config.toml
    nano snowflake_config.toml  # or code snowflake_config.toml, vim, etc.
-   # Replace the sample configuration with your actual config from Snowflake
+   
+   # For SSO: Keep 'authenticator = "externalbrowser"', remove password
+   # For Password: Remove authenticator line, add your password
    ```
 
 ✅ **Benefits of this method:**
 - **Copy-paste setup** - No manual typing or translation needed
-- **No password needed** - Uses your browser login (SSO/MFA supported)
-- **More secure** - No stored passwords
-- **Exact format** - Guaranteed to work
+- **SSO/MFA Support** - Works with your organization's authentication
+- **Easy switching** - Comment/uncomment lines to change auth methods
+- **More secure** - Browser auth doesn't store passwords locally
+- **Exact format** - Guaranteed to work with Snowflake's format
 - **App detects automatically** - Prioritizes config file over .env
 
 ### Alternative: Manual Method (If Needed)
