@@ -253,6 +253,8 @@ schema = "PUBLIC"
 - **Exact format** - Guaranteed to work with Snowflake's format
 - **App detects automatically** - Prioritizes config file over .env
 
+> **💡 Tip**: If you encounter SSL certificate errors with browser authentication, use password authentication instead. Browser auth can be sensitive to corporate network configurations.
+
 ### Alternative: Manual Method (If Needed)
 
 <details>
@@ -295,6 +297,8 @@ SNOWFLAKE_WAREHOUSE=COMPUTE_WH              # Set your preferred warehouse
 SNOWFLAKE_DATABASE=SALES_DB                 # Set your preferred database
 SNOWFLAKE_SCHEMA=PUBLIC                     # Usually PUBLIC
 ```
+
+> **⚠️ Browser Auth Issues?** If you get SSL certificate errors or the browser window doesn't open, try password authentication instead or see the [SSL troubleshooting section](#-connection-failed-250003-or-ssl-certificate-errors) below.
 
 #### Password Authentication (Traditional)
 **If you prefer username/password:**
@@ -389,9 +393,69 @@ ORDER BY count DESC;
 - Verify account identifier format (see "Getting Your Snowflake Credentials" section)
 - Try logging into Snowflake web UI with same credentials
 
-#### ❌ "Connection failed: 250003" 
-**Problem**: Network connectivity issues
+#### ❌ "Connection failed: 250003" or SSL Certificate Errors
+**Problem**: SSL/TLS certificate verification issues or network connectivity
+**Common Error Messages**:
+- `certificate verify failed`
+- `bad handshake: Error([('SSL routines', '', 'certificate verify failed')])`
+- `HTTPSConnectionPool... Max retries exceeded`
+- `Hit non-retryable SSL error`
+
 **Solutions**:
+
+**Option 1: Fix SSL Configuration (Recommended)**
+```bash
+# Add SSL configuration to your snowflake_config.toml
+[connections.my_example_connection]
+account = "your-account"
+user = "your-username"
+authenticator = "externalbrowser"
+# Add these SSL options:
+insecure_mode = false
+disable_request_pooling = false
+```
+
+**Option 2: Python SSL Environment Variables**
+```bash
+# Add these before running the app
+export PYTHONHTTPSVERIFY=0
+export SSL_VERIFY=False
+
+# Then run the app
+uv run streamlit run app.py
+```
+
+**Option 3: Update System Certificates**
+```bash
+# macOS - Update certificates
+brew install ca-certificates
+# Or update Python certificates
+/Applications/Python\ 3.x/Install\ Certificates.command
+
+# Linux - Update ca-certificates
+sudo apt-get update && sudo apt-get install ca-certificates
+
+# Windows - Update Windows certificates through Windows Update
+```
+
+**Option 4: Corporate Network Workarounds**
+- **VPN Issues**: Try connecting/disconnecting VPN
+- **Proxy**: Configure proxy settings in your environment
+- **Firewall**: Ask IT to allowlist `*.snowflakecomputing.com` on port 443
+- **Certificate Authority**: Ask IT for your organization's certificate bundle
+
+**Option 5: Alternative Authentication**
+If browser auth fails, try password authentication:
+```toml
+[connections.my_example_connection]
+account = "your-account"
+user = "your-username"
+password = "your-password"  # Instead of authenticator = "externalbrowser"
+role = "your-role"
+warehouse = "your-warehouse"
+```
+
+**General Network Issues**:
 - Check your internet connection
 - Verify you can access Snowflake web UI from your browser
 - Check if your organization uses VPN or firewall restrictions
