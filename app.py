@@ -214,16 +214,25 @@ def fetch_schemas(conn, database, include_system_schemas=False):
         return []
 
 def fetch_tables(conn, database, schema):
-    """Fetch list of tables for a given database and schema"""
+    """Fetch list of tables and views for a given database and schema"""
     try:
         cursor = conn.cursor()
+        
+        # Get tables
         cursor.execute(f"SHOW TABLES IN SCHEMA {database}.{schema}")
-        results = cursor.fetchall()
-        # Extract table names from the results
-        tables = [row[1] for row in results]  # name is typically the second column
-        return sorted(tables)
+        table_results = cursor.fetchall()
+        tables = [row[1] for row in table_results]  # name is typically the second column
+        
+        # Get views
+        cursor.execute(f"SHOW VIEWS IN SCHEMA {database}.{schema}")
+        view_results = cursor.fetchall()
+        views = [row[1] for row in view_results]  # name is typically the second column
+        
+        # Combine and sort
+        all_objects = tables + views
+        return sorted(all_objects)
     except Exception as e:
-        st.error(f"Failed to fetch tables for {database}.{schema}: {str(e)}")
+        st.error(f"Failed to fetch tables and views for {database}.{schema}: {str(e)}")
         return []
 
 def fetch_columns(conn, database, schema, table):
@@ -532,14 +541,14 @@ def main():
             table_options = [""] + available_tables
             
             table = st.selectbox(
-                "Table *",
+                "Table/View *",
                 options=table_options,
                 index=0,  # Always start with empty selection
-                help="Select a table within the schema (required)"
+                help="Select a table or view within the schema (required)"
             )
         else:
             table = st.selectbox(
-                "Table *",
+                "Table/View *",
                 options=[""],
                 disabled=True,
                 help="Select database and schema first (required)"
@@ -617,7 +626,7 @@ def main():
         if submitted:
             # Check if required fields are selected
             if not (database and schema and table):
-                st.error("Please select all required fields: Database *, Schema *, and Table *")
+                st.error("Please select all required fields: Database *, Schema *, and Table/View *")
                 object_name = None
                 object_type = None
             else:
