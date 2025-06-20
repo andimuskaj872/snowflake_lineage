@@ -43,6 +43,9 @@ Interactive Streamlit application for exploring Snowflake data lineage relations
    
    # Create virtual environment and install dependencies (one command!)
    uv sync
+   
+   # If you get TLS/SSL certificate errors, use:
+   # uv sync --native-tls
    ```
 
 3. **Configure Snowflake credentials** (Choose one method)
@@ -415,6 +418,9 @@ ORDER BY count DESC;
 # Clear uv cache and retry
 uv cache clean
 uv sync
+
+# For TLS/SSL certificate errors (common on corporate networks)
+uv sync --native-tls
 
 # Or use specific Python version
 uv sync --python 3.11
