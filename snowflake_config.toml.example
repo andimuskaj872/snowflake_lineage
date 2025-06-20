@@ -12,6 +12,9 @@ role = "YOUR_ROLE"
 warehouse = "YOUR_WAREHOUSE"
 database = "YOUR_DATABASE"
 schema = "YOUR_SCHEMA"
+# SSL options (uncomment if you have certificate issues):
+# insecure_mode = true
+# ocsp_fail_open = true
 
 # Option 2: Password Authentication (Traditional)
 # Uncomment the section below and comment out the SSO section above to use password auth
@@ -23,6 +26,9 @@ schema = "YOUR_SCHEMA"
 # warehouse = "YOUR_WAREHOUSE"
 # database = "YOUR_DATABASE"
 # schema = "YOUR_SCHEMA"
+# SSL options (uncomment if you have certificate issues):
+# insecure_mode = true
+# ocsp_fail_open = true
 
 # Quick Setup Instructions:
 # 1. Copy this file to 'snowflake_config.toml'

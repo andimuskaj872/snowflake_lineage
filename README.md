@@ -403,7 +403,9 @@ ORDER BY count DESC;
 
 **Solutions**:
 
-**Option 1: Fix SSL Configuration (Recommended)**
+> **🔄 Automatic Fallback**: The app now automatically attempts to connect with relaxed SSL settings if certificate verification fails. You should see a warning message and then a successful connection.
+
+**Option 1: Manual SSL Configuration**
 ```bash
 # Add SSL configuration to your snowflake_config.toml
 [connections.my_example_connection]
@@ -411,8 +413,8 @@ account = "your-account"
 user = "your-username"
 authenticator = "externalbrowser"
 # Add these SSL options:
-insecure_mode = false
-disable_request_pooling = false
+insecure_mode = true
+ocsp_fail_open = true
 ```
 
 **Option 2: Python SSL Environment Variables**

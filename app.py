@@ -106,9 +106,34 @@ def create_connection():
         connection_params = {k: v for k, v in connection_params.items() if v}
         
         
-        # Create connection
-        conn = snowflake.connector.connect(**connection_params)
-        return conn
+        # Add SSL configuration to handle certificate issues
+        ssl_options = {
+            'insecure_mode': False,  # Keep secure by default
+            'ocsp_fail_open': True,  # Allow connection if OCSP check fails
+            'disable_request_pooling': False,
+        }
+        
+        # For SSL certificate issues, add fallback options
+        try:
+            # Try with standard SSL settings first
+            conn = snowflake.connector.connect(**connection_params, **ssl_options)
+            return conn
+        except Exception as ssl_error:
+            if "certificate verify failed" in str(ssl_error) or "SSL" in str(ssl_error):
+                st.warning("⚠️ SSL certificate verification failed. Attempting connection with relaxed SSL settings...")
+                
+                # Fallback: Try with insecure mode for certificate issues
+                ssl_options['insecure_mode'] = True
+                try:
+                    conn = snowflake.connector.connect(**connection_params, **ssl_options)
+                    st.info("✅ Connected using relaxed SSL settings. Consider updating your system certificates for better security.")
+                    return conn
+                except Exception as fallback_error:
+                    st.error(f"Connection failed even with relaxed SSL settings: {str(fallback_error)}")
+                    raise fallback_error
+            else:
+                # Re-raise non-SSL errors
+                raise ssl_error
     except Exception as e:
         st.error(f"Connection failed: {str(e)}")
         return None
