@@ -3,9 +3,19 @@ import snowflake.connector
 import pandas as pd
 import os
 import configparser
+import ssl
+import urllib3
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Disable SSL warnings for insecure connections
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Check for SSL bypass environment variable
+if os.getenv('SNOWFLAKE_DISABLE_SSL_VERIFY', '').lower() in ('true', '1', 'yes'):
+    ssl._create_default_https_context = ssl._create_unverified_context
+    st.info("🔓 SSL verification disabled via SNOWFLAKE_DISABLE_SSL_VERIFY environment variable")
 
 st.set_page_config(page_title="Snowflake Lineage Explorer", layout="wide")
 
@@ -120,17 +130,38 @@ def create_connection():
             return conn
         except Exception as ssl_error:
             if "certificate verify failed" in str(ssl_error) or "SSL" in str(ssl_error):
-                st.warning("⚠️ SSL certificate verification failed. Attempting connection with relaxed SSL settings...")
+                st.warning("⚠️ SSL certificate verification failed. Attempting connection with comprehensive SSL bypass...")
                 
-                # Fallback: Try with insecure mode for certificate issues
-                ssl_options['insecure_mode'] = True
+                # Set Python-level SSL context to not verify certificates
+                original_context = ssl._create_default_https_context
+                ssl._create_default_https_context = ssl._create_unverified_context
+                
+                # More comprehensive SSL bypass options
+                ssl_options.update({
+                    'insecure_mode': True,
+                    'ocsp_fail_open': True,
+                    'disable_request_pooling': True,
+                    'validate_default_parameters': False,
+                })
+                
                 try:
                     conn = snowflake.connector.connect(**connection_params, **ssl_options)
-                    st.info("✅ Connected using relaxed SSL settings. Consider updating your system certificates for better security.")
+                    st.success("✅ Connected using comprehensive SSL bypass. Consider updating your system certificates for better security.")
                     return conn
                 except Exception as fallback_error:
-                    st.error(f"Connection failed even with relaxed SSL settings: {str(fallback_error)}")
+                    # Restore original SSL context
+                    ssl._create_default_https_context = original_context
+                    
+                    # Try password authentication as last resort if using browser auth
+                    if connection_params.get('authenticator') == 'externalbrowser':
+                        st.warning("🔄 Browser authentication failed. Try switching to password authentication in your config file.")
+                        st.info("💡 Remove 'authenticator = \"externalbrowser\"' and add 'password = \"your_password\"' to your config.")
+                    
+                    st.error(f"Connection failed even with comprehensive SSL bypass: {str(fallback_error)}")
                     raise fallback_error
+                finally:
+                    # Always restore original SSL context
+                    ssl._create_default_https_context = original_context
             else:
                 # Re-raise non-SSL errors
                 raise ssl_error

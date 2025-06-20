@@ -401,9 +401,15 @@ ORDER BY count DESC;
 - `HTTPSConnectionPool... Max retries exceeded`
 - `Hit non-retryable SSL error`
 
+**Quick Fix (Try This First)**:
+```bash
+export SNOWFLAKE_DISABLE_SSL_VERIFY=true
+uv run streamlit run app.py
+```
+
 **Solutions**:
 
-> **🔄 Automatic Fallback**: The app now automatically attempts to connect with relaxed SSL settings if certificate verification fails. You should see a warning message and then a successful connection.
+> **🔄 Automatic Fallback**: The app automatically attempts to connect with relaxed SSL settings if certificate verification fails. If that doesn't work, try the environment variable above.
 
 **Option 1: Manual SSL Configuration**
 ```bash
@@ -417,9 +423,18 @@ insecure_mode = true
 ocsp_fail_open = true
 ```
 
-**Option 2: Python SSL Environment Variables**
+**Option 2: Environment Variable SSL Bypass (Easiest)**
 ```bash
-# Add these before running the app
+# Set environment variable to disable SSL verification
+export SNOWFLAKE_DISABLE_SSL_VERIFY=true
+
+# Then run the app
+uv run streamlit run app.py
+```
+
+**Option 3: Python SSL Environment Variables**
+```bash
+# Alternative Python-level SSL bypass
 export PYTHONHTTPSVERIFY=0
 export SSL_VERIFY=False
 
@@ -427,7 +442,7 @@ export SSL_VERIFY=False
 uv run streamlit run app.py
 ```
 
-**Option 3: Update System Certificates**
+**Option 4: Update System Certificates**
 ```bash
 # macOS - Update certificates
 brew install ca-certificates
@@ -440,13 +455,13 @@ sudo apt-get update && sudo apt-get install ca-certificates
 # Windows - Update Windows certificates through Windows Update
 ```
 
-**Option 4: Corporate Network Workarounds**
+**Option 5: Corporate Network Workarounds**
 - **VPN Issues**: Try connecting/disconnecting VPN
 - **Proxy**: Configure proxy settings in your environment
 - **Firewall**: Ask IT to allowlist `*.snowflakecomputing.com` on port 443
 - **Certificate Authority**: Ask IT for your organization's certificate bundle
 
-**Option 5: Alternative Authentication**
+**Option 6: Alternative Authentication**
 If browser auth fails, try password authentication:
 ```toml
 [connections.my_example_connection]
