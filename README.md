@@ -403,9 +403,10 @@ ORDER BY count DESC;
 
 **Quick Fix (Try This First)**:
 ```bash
-export SNOWFLAKE_DISABLE_SSL_VERIFY=true
+# For corporate networks with SSL inspection
 uv run streamlit run app.py
 ```
+> **Note**: The app now automatically disables SSL verification for corporate networks. No environment variables needed!
 
 **Solutions**:
 
@@ -460,6 +461,7 @@ sudo apt-get update && sudo apt-get install ca-certificates
 - **Proxy**: Configure proxy settings in your environment
 - **Firewall**: Ask IT to allowlist `*.snowflakecomputing.com` on port 443
 - **Certificate Authority**: Ask IT for your organization's certificate bundle
+- **SSL Inspection**: Many corporate networks (especially healthcare) use SSL inspection that breaks certificate chains. The app now handles this automatically.
 
 **Option 6: Alternative Authentication**
 If browser auth fails, try password authentication:
